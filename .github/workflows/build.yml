@@ -1,0 +1,43 @@
+
+name: Crear APK Mis Horas Extras
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Extraer proyecto
+        run: |
+          unzip -q Mis_Horas_Extras_Android_proyecto_corregido.zip -d source
+          ls -la source/Mis_Horas_Extras_Android
+
+      - name: Descargar Gradle
+        run: |
+          curl -L https://services.gradle.org/distributions/gradle-8.7-bin.zip -o gradle.zip
+          unzip -q gradle.zip
+
+      - name: Compilar APK
+        run: |
+          cd source/Mis_Horas_Extras_Android
+          $GITHUB_WORKSPACE/gradle-8.7/bin/gradle assembleDebug
+
+      - name: Guardar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mis-Horas-Extras-APK
+          path: source/Mis_Horas_Extras_Android/app/build/outputs/apk/debug/*.apk
